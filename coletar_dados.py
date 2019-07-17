@@ -5,11 +5,40 @@ def buscar_links(materia, assunto):
     urls = []
 
     for resultado in search(f'"Brasil escola {materia} - {assunto} exercicios" stop = 5'):
-        if re.search('brasilescola.uol.com.br', resultado):
+        if "brasilescola.uol.com.br" in resultado and "exercicios" in resultado:
             urls.append(resultado)
     
     return urls
 
+def extrair_questoes(urls):
+    questoes = []
+    
+    for url in urls:
+        site = requests.get(url)
+        site = BeautifulSoup(site.text, features='html.parser')
+        pattern = re.compile("(questoes-descricao|questao|questoes)")
+        comparate = re.findall(pattern, str(site))
+
+        if comparate:
+            site = site.find_all(attrs={'class':comparate[0]})
+        
+        print(site)
+        print("....")
+
+    return questoes
+
+def escrever_questoes(materia, assunto, questoes):
+
+    with open(f'prova_{materia}.txt', 'w') as file:
+        file.write(f'PROVA DE {materia.capitalize()} - {assunto.capitalize()}')
+
+        for i in range(len(questoes)):
+            file.write(f'{str(i + 1)} - {questoes[i]}\n')
+            file.write('\n')
+
 if __name__ == "__main__":
-    urls = buscar_links("geografia", "geopolitica")
+    urls = buscar_links(input("Materia: "), input("Assunto: "))
     print(urls)
+    extrair_questoes(urls)
+    #questoes = extrair_questoes(urls)
+    #escrever_questoes('geografia', 'geopolitica', questoes)
