@@ -16,13 +16,15 @@ def extrair_questoes(urls):
     for url in urls:
         site = requests.get(url)
         site = BeautifulSoup(site.text, features='html.parser')
-        pattern = re.compile("(questoes-descricao|questao|questoes)")
+        pattern = re.compile("(questoes-descricao)")
         comparate = re.findall(pattern, str(site))
 
         if comparate:
-            site = site.find_all(attrs={'class':comparate[0]})
+            site = site.find(attrs={'class':comparate[0]})
+            var = site.find_all('p')
+            print(len(var))
+            print(var[0].text)
         
-        print(site)
         print("....")
 
     return questoes
