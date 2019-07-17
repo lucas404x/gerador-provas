@@ -11,7 +11,6 @@ def buscar_links(materia, assunto):
     return urls
 
 def extrair_questoes(urls):
-    questoes = []
     
     for url in urls:
         site = requests.get(url)
@@ -27,7 +26,8 @@ def extrair_questoes(urls):
         
         print("....")
 
-    return questoes
+def armazenar_questoes(questao):
+    pass
 
 def escrever_questoes(materia, assunto, questoes):
 
