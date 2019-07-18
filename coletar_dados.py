@@ -4,27 +4,38 @@ import requests, re
 def buscar_links(materia, assunto):
     urls = []
 
-    for resultado in search(f'"Brasil escola {materia} - {assunto} exercicios" stop = 5'):
-        if "brasilescola.uol.com.br" in resultado and "exercicios" in resultado:
-            urls.append(resultado)
+    try:
+        for resultado in search(f'"Brasil escola {materia} - {assunto} exercicios" stop = 5'):
+            if "brasilescola.uol.com.br" in resultado and "exercicios" in resultado:
+                urls.append(resultado)
     
-    return urls
+    except Exception as e:
+        print("Não conseguimos acessar o site.", e)
+    
+    finally:
+        return urls
 
 def extrair_questoes(urls):
     
     for url in urls:
-        site = requests.get(url)
+        try:
+            site = requests.get(url)
+        except Exception as e:
+            print("Não conseguimos acessar o site.", e)
+            return
+
         site = BeautifulSoup(site.text, features='html.parser')
         pattern = re.compile("(questoes-descricao)")
         comparate = re.findall(pattern, str(site))
 
         if comparate:
-            site = site.find(attrs={'class':comparate[0]})
-            var = site.find_all('p')
-            print(len(var))
-            print(var[0].text)
-        
-        print("....")
+            site = site.find_all(attrs={'class':comparate[0]})
+            for i in site:
+                questao = i.find_all('p')
+                for paragrafo in questao:
+                    print(paragrafo.text)
+                
+                print('....')
 
 def armazenar_questoes(questao):
     pass
