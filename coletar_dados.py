@@ -3,7 +3,7 @@ import requests, re
 
 def buscar_links(materia, assunto):
     urls = []
-
+    
     try:
         for resultado in search(f'"Brasil escola {materia} - {assunto} exercicios" stop = 5'):
             if "brasilescola.uol.com.br" in resultado and "exercicios" in resultado:
@@ -16,7 +16,8 @@ def buscar_links(materia, assunto):
         return urls
 
 def extrair_questoes(urls):
-    
+    questoes = []
+
     for url in urls:
         try:
             site = requests.get(url)
@@ -30,28 +31,36 @@ def extrair_questoes(urls):
 
         if comparate:
             site = site.find_all(attrs={'class':comparate[0]})
+            
             for i in site:
-                questao = i.find_all('p')
-                for paragrafo in questao:
-                    print(paragrafo.text)
-                
-                print('....')
+                questao = ''
+                paragrafos = i.find_all('p')
 
-def armazenar_questoes(questao):
-    pass
+                for paragrafo in paragrafos:
+                    questao += (paragrafo.text + '\n')
+                
+                questoes.append(questao)
+    
+    return questoes
 
 def escrever_questoes(materia, assunto, questoes):
 
-    with open(f'prova_{materia}.txt', 'w') as file:
-        file.write(f'PROVA DE {materia.capitalize()} - {assunto.capitalize()}')
-
+    with open(f'prova_{materia.lower()}_{assunto.lower()}.txt', 'w') as file:
+        file.write(f'Prova de {materia.capitalize()} - {assunto.capitalize()}\n')
+        file.write('\n')
+            
         for i in range(len(questoes)):
             file.write(f'{str(i + 1)} - {questoes[i]}\n')
             file.write('\n')
 
 if __name__ == "__main__":
-    urls = buscar_links(input("Materia: "), input("Assunto: "))
-    print(urls)
-    extrair_questoes(urls)
-    #questoes = extrair_questoes(urls)
-    #escrever_questoes('geografia', 'geopolitica', questoes)
+
+    materia = input("Materia: ")
+    assunto = input("Assunto: ")
+    
+    print("pesquisando...")
+    urls = buscar_links(materia, assunto)
+    print("extraindo...")
+    questoes = extrair_questoes(urls)
+    print("escrevendo...")
+    escrever_questoes(materia, assunto, questoes)
