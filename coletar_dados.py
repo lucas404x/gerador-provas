@@ -5,7 +5,7 @@ def buscar_links(materia, assunto):
     urls = []
     
     try:
-        for resultado in search(f'"Brasil escola {materia} - {assunto} exercicios" stop = 5'):
+        for resultado in search(f'"Brasil escola {materia} - {assunto} exercicios" google', stop = 5):
             if "brasilescola.uol.com.br" in resultado and "exercicios" in resultado:
                 urls.append(resultado)
     
@@ -45,7 +45,7 @@ def extrair_questoes(urls):
 
 def escrever_questoes(materia, assunto, questoes):
 
-    with open(f'prova_{materia.lower()}_{assunto.lower()}.txt', 'w') as file:
+    with open(f'prova_{materia.lower()}_{assunto.lower()}.txt', 'w', encoding="utf-8") as file:
         file.write(f'Prova de {materia.capitalize()} - {assunto.capitalize()}\n')
         file.write('\n')
             
