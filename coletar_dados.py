@@ -1,4 +1,6 @@
-from googlesearch import BeautifulSoup, search
+from googlesearch import search
+from bs4 import BeautifulSoup
+
 import requests, re
 
 def buscar_links(materia, assunto):
