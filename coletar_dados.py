@@ -44,40 +44,43 @@ def acessar_links(urls):
     return sites
 
 
-def extrair_questoes(site):
+def extrair_dados(site, questao_resposta):
     """
-    função que serve para extrair as questões do site Brasil escola.
+    função que serve para extrair as questões ou respostas do site Brasil escola.
 
     site - objeto do tipo request.
+    questao_resposta - número inteiro: 0 para as questões ou 1 para as respostas
     """
+    
+    if questao_resposta == 0:
+        tipo_dado = "(questoes-descricao)"
+    
+    elif questao_resposta == 1:
+        tipo_dado = "(resposta-descricao)"
+    
+    else:
+        raise "Tipo de dado para questao_resposta invalido."
 
-    questoes = []
+    dados = []
 
     site = BeautifulSoup(site.text, features='html.parser')
-    pattern = re.compile("(questoes-descricao)")
+    pattern = re.compile(tipo_dado)
     comparate = re.findall(pattern, str(site))
 
     if comparate:
         site = site.find_all(attrs={'class':comparate[0]})
 
-        for questao_descricao in site:
-            questao = ''
-            paragrafos = questao_descricao.find_all('p')
+        for tipo_de_dado in site:
+            dado = ''
+            paragrafos = tipo_de_dado.find_all('p')
 
             for paragrafo in paragrafos:
-                questao += (paragrafo.text + '\n')
+                dado += (paragrafo.text + '\n')
             
-            questoes.append(questao)
+            dados.append(dado)
 
-    return questoes
+    return dados
 
-def extrair_respostas(site):
-    """
-    função que serve para extrair as respostas do site Brasil escola.
-
-    site - objeto do tipo request.
-    """
-    pass
 
 def escrever_prova(materia, assunto, questoes_ou_respostas, tipo):
     """
