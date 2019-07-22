@@ -1,5 +1,6 @@
 from googlesearch import search
 from bs4 import BeautifulSoup
+from PIL import Image
 
 import requests, re
 
@@ -26,6 +27,7 @@ def buscar_links(materia, assunto):
 def acessar_links(urls):
     """
     função responsavel por acessar os links do site da Brasil Escola.
+
     urls - vetor com N url.
     """
 
@@ -43,6 +45,24 @@ def acessar_links(urls):
 
     return sites
 
+def verificar_parametro(questao_resposta):
+    """
+    função responsavel por verificar se foi posto um valor valido na
+    função extrair_dados e retorna o valor valido como uma string
+    que vai ser usada na função extrair_dados.
+
+    questao_resposta - número inteiro
+    """
+
+    if questao_resposta == 0:
+        return "(questoes-descricao)"
+    
+    elif questao_resposta == 1:
+        return "(resposta-descricao)"
+    
+    else:
+        raise "Tipo de dado para questao_resposta invalido."
+
 
 def extrair_dados(site, questao_resposta):
     """
@@ -51,16 +71,8 @@ def extrair_dados(site, questao_resposta):
     site - objeto do tipo request.
     questao_resposta - número inteiro: 0 para as questões ou 1 para as respostas
     """
-    
-    if questao_resposta == 0:
-        tipo_dado = "(questoes-descricao)"
-    
-    elif questao_resposta == 1:
-        tipo_dado = "(resposta-descricao)"
-    
-    else:
-        raise "Tipo de dado para questao_resposta invalido."
 
+    tipo_dado = verificar_parametro(questao_resposta)
     dados = []
 
     site = BeautifulSoup(site.text, features='html.parser')
@@ -103,4 +115,8 @@ def escrever_prova(materia, assunto, questoes_ou_respostas, tipo):
             file.write('\n')
 
 if __name__ == "__main__":
-    pass
+    links = acessar_links(buscar_links("Geografia", "Neoliberalismo"))
+    escrever_prova("Geografia", "Neoliberalismo", extrair_dados(links[0], 3), "questoes")
+    escrever_prova("Geografia", "Neoliberalismo", extrair_dados(links[0], 1), "respostas")
+
+    
