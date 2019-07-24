@@ -1,4 +1,5 @@
 from tkinter import *
+from controller.gerarProva import gerar_prova
 
 class Main:
 
@@ -40,18 +41,24 @@ class Main:
     def create_buttons(self):
         self.clear_button = Button(self.frame_final, 
         text = "Limpar", command = self.clear)
+        self.gerar_prova_button = Button(self.frame_final, 
+        text = "Gerar Prova", command = gerar_prova)
+        self.sair_button = Button(self.frame_final, 
+        text = "Sair", command = lambda: self.window.destroy())
    
     def clear(self):
         self.entrada_materia.delete(0, END) 
         self.entrada_assunto.delete(0, END)
     
     def package(self):
-        self.cabecalho.pack(pady = 12)
-        self.conteudo.pack(pady = 32)
+        self.cabecalho.pack(pady = 8)
+        self.conteudo.pack(pady = 16)
         self.welcome.pack()
         self.label_materia.pack()
         self.entrada_materia.pack()
         self.label_assunto.pack()
         self.entrada_assunto.pack()
-        self.frame_final.pack(pady = 6)
-        self.clear_button.pack(side = 'left')
+        self.frame_final.pack()
+        self.clear_button.pack(side = 'right', padx = 4)
+        self.gerar_prova_button.pack(side = 'right', padx = 4)
+        self.sair_button.pack(side = 'left', padx = 4)
