@@ -27,27 +27,33 @@ class Main:
     def create_entrys(self):
         self.entrada_materia = Entry(self.conteudo, 
         font = ("Arial", 12, "bold"), foreground = "green")
+        
         self.entrada_assunto = Entry(self.conteudo, 
         font = ("Arial", 12, "bold"), foreground = "green")
     
     def create_labels(self):
         self.welcome = Label(self.cabecalho, text = 'Gerador de Provas', 
         bg = 'black', foreground = 'white', font = ('Arial', 14, 'bold'))
+        
         self.label_materia = Label(self.conteudo, text = 'Matéria', 
         foreground = 'black', font = ('Arial', 11))
+        
         self.label_assunto = Label(self.conteudo, text = 'Assunto', 
         foreground = 'black', font = ('Arial', 11))
     
     def create_buttons(self):
         self.clear_button = Button(self.frame_final, 
         text = "Limpar", command = self.clear)
+        
         self.gerar_prova_button = Button(self.frame_final, 
-        text = "Gerar Prova", command = gerar_prova)
+        text = "Gerar Prova", 
+        command = lambda: gerar_prova(self.entrada_materia.get(), self.entrada_assunto.get()))
+        
         self.sair_button = Button(self.frame_final, 
         text = "Sair", command = lambda: self.window.destroy())
    
     def clear(self):
-        self.entrada_materia.delete(0, END) 
+        self.entrada_materia.delete(0, END)
         self.entrada_assunto.delete(0, END)
     
     def package(self):

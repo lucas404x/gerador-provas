@@ -1,0 +1,1 @@
+from gerador_provas.models import *
