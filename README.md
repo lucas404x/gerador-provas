@@ -1,4 +1,3 @@
 # Gerador de Provas
 
-Esse aplicativo tem a função de procurar as questões na internet sobre a prova que você quer fazer e imprimir uma quantidade N
-de provas.
+Esse programa tem a função de procurar as questões no site da Brasil Escola sobre a prova que você quer fazer e gerar um PDF com as N questões encontradas.
