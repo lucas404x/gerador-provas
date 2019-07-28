@@ -5,7 +5,7 @@ import requests
 import re
 
 
-def validar_url(url: str):
+def validar_url(url):
 	"""
 	função que serve verificar se a url pertence a sessão de exercicios da Brasil Escola.
 	"""
@@ -15,21 +15,21 @@ def validar_url(url: str):
 	return False
 
 
-def buscar_links(materia: str, assunto: str):
+def buscar_links(materia, assunto):
 	"""
 	função responsavel por pesquisar os links do site da Brasil Escola.
 	"""
-	return [url for url in search(f"Brasil escola {materia} - {assunto} exercicios", stop = 5)
-	if validar_url(url)]
+	return [url for url in search("Brasil escola {} - {} exercicios".format(materia, assunto)
+    , stop = 5) if validar_url(url)]
 
 
-def acessar_links(urls: list):
+def acessar_links(urls):
 	"""
 	função responsavel por acessar os links do site da Brasil Escola.
 	"""
 	return [requests.get(site) for site in urls]
 
-def extrair_dados(sites: list, questao_resposta: int):
+def extrair_dados(sites, questao_resposta):
     """
     função responsavel por extrair as questões/respostas do site Brasil Escola.
     questao_resposta: 0 para extrair as questões e 1 para as respostas.
@@ -76,11 +76,11 @@ def escrever_prova(materia, assunto, dados, tipo):
     tipo - string com a palavra "questões" ou "respostas", para diferenciar o texto.
     """
     
-    with open(f'prova_{materia.lower()}_{assunto.lower()}_{tipo.lower()}.txt', 'w'
+    with open('prova_{}_{}_{}.txt'.format(materia.lower(), assunto.lower(), tipo.lower()), 'w'
         ,encoding="utf-8") as file:
-            file.write(f'Prova de {materia.capitalize()} - {assunto.capitalize()}\n')
+            file.write('Prova de {} - {}\n'.format(materia.capitalize(), assunto.capitalize()))
             file.write('\n')
             
             for i in range(len(dados)):
-                file.write(f'{str(i + 1)} - {dados[i]}\n')
+                file.write('{} - {}\n'.format(str(i + 1), dados[i]))
                 file.write('\n')
