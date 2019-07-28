@@ -1,5 +1,7 @@
 from googlesearch import search
 from bs4 import BeautifulSoup
+from io import BytesIO
+from PIL import Image
 
 import requests
 import re
@@ -38,6 +40,7 @@ def extrair_dados(sites, questao_resposta):
     tipo_dado = verificar_retornar_valor(questao_resposta)
     dados = []
     
+    id_img = 0
     for site in sites:
         site_ = BeautifulSoup(site.text, features='html.parser')
         pattern = re.compile(tipo_dado)
@@ -47,7 +50,15 @@ def extrair_dados(sites, questao_resposta):
             site_ = site_.find_all(attrs = {'class':comparate[0]})
             for tag in site_:
                 dado = ''
+                imagens = tag.find_all('img')
                 paragrafos = tag.find_all('p')
+                
+                for imagem in imagens:
+                    img = requests.get(imagem['src'])
+                    img = Image.open(BytesIO(img.content))
+                    img.save('{}.png'.format(id_img))
+                    id_img += 1
+                
                 for paragrafo in paragrafos:
                     dado += (paragrafo.text + '\n')
                 
