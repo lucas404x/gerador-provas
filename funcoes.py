@@ -2,6 +2,7 @@ from googlesearch import search
 from bs4 import BeautifulSoup
 from io import BytesIO
 from PIL import Image
+from tkinter import filedialog
 
 import requests
 import re
@@ -86,9 +87,10 @@ def escrever_prova(materia, assunto, dados, tipo):
     dados - vetor com as N questões ou respostas;
     tipo - string com a palavra "questões" ou "respostas", para diferenciar o texto.
     """
-    
-    with open('prova_{}_{}_{}.txt'.format(materia.lower(), assunto.lower(), tipo.lower()), 'w'
-        ,encoding="utf-8") as file:
+    options = {'title': 'Salvar as {} em'.format(tipo), 
+    'defaultextension':'.txt'}
+
+    with  filedialog.asksaveasfile('w', **options) as file:
             file.write('Prova de {} - {}\n'.format(materia.capitalize(), assunto.capitalize()))
             file.write('\n')
             
