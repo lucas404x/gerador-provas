@@ -4,9 +4,12 @@ from io import BytesIO
 from PIL import Image
 from tkinter import filedialog
 
+import _locale
 import requests
 import re
 
+def setar_encoding(encoding):
+    _locale._getdefaultlocale = (lambda *args: ['en_US', encoding])
 
 def validar_url(url):
 	"""
@@ -57,7 +60,7 @@ def extrair_dados(sites, questao_resposta):
                 for imagem in imagens:
                     img = requests.get(imagem['src'])
                     img = Image.open(BytesIO(img.content))
-                    img.save('{}.png'.format(id_img))
+                    img.save('{}.png'.format(tipo_dado + str(id_img)))
                     id_img += 1
                 
                 for paragrafo in paragrafos:
@@ -89,8 +92,9 @@ def escrever_prova(materia, assunto, dados, tipo):
     """
     options = {'title': 'Salvar as {} em'.format(tipo), 
     'defaultextension':'.txt'}
-
-    with  filedialog.asksaveasfile('w', **options) as file:
+    setar_encoding('utf-8')
+    
+    with filedialog.asksaveasfile('w', **options) as file:
             file.write('Prova de {} - {}\n'.format(materia.capitalize(), assunto.capitalize()))
             file.write('\n')
             
