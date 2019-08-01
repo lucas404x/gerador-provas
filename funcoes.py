@@ -3,10 +3,16 @@ from bs4 import BeautifulSoup
 from io import BytesIO
 from PIL import Image
 from tkinter import filedialog
+from reportlab.pdfgen import canvas
 
 import _locale
 import requests
 import re
+import sys
+
+def pegar_nome_arquivo(diretorio):
+    indice = diretorio.rfind('/') if sys.platform == "linux" else diretorio.rfind('\\')
+    return diretorio[indice + 1:]
 
 def setar_encoding(encoding):
     _locale._getdefaultlocale = (lambda *args: ['en_US', encoding])
@@ -57,12 +63,14 @@ def extrair_dados(sites, questao_resposta):
                 imagens = tag.find_all('img')
                 paragrafos = tag.find_all('p')
                 
+                #extração das imagens
                 for imagem in imagens:
                     img = requests.get(imagem['src'])
                     img = Image.open(BytesIO(img.content))
                     img.save('{}.png'.format(tipo_dado + str(id_img)))
                     id_img += 1
                 
+                #extração do texto dos dados
                 for paragrafo in paragrafos:
                     dado += (paragrafo.text + '\n')
                 
@@ -86,18 +94,23 @@ def verificar_retornar_valor(questao_resposta):
 
 def escrever_prova(materia, assunto, dados, tipo):
     """
-    metodo que serve para escrever em um documento .txt as questoes ou respostas da atividade/prova.
+    metodo que serve para escrever em um documento pdf as questoes ou respostas da atividade/prova.
     dados - vetor com as N questões ou respostas;
     tipo - string com a palavra "questões" ou "respostas", para diferenciar o texto.
     """
+
     options = {'title': 'Salvar as {} em'.format(tipo), 
-    'defaultextension':'.txt'}
+    'defaultextension':'.pdf'}
+
     setar_encoding('utf-8')
     
     with filedialog.asksaveasfile('w', **options) as file:
-            file.write('Prova de {} - {}\n'.format(materia.capitalize(), assunto.capitalize()))
-            file.write('\n')
+        print(file.name)
+        print(pegar_nome_arquivo(file.name))
+
+        file.write('Prova de {} - {}\n'.format(materia.capitalize(), assunto.capitalize()))
+        file.write('\n')
             
-            for i in range(len(dados)):
-                file.write('{} - {}\n'.format(str(i + 1), dados[i]))
-                file.write('\n')
+        for i in range(len(dados)):
+            file.write('{} - {}\n'.format(str(i + 1), dados[i]))
+            file.write('\n')
