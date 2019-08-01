@@ -8,10 +8,9 @@ from reportlab.pdfgen import canvas
 import _locale
 import requests
 import re
-import sys
 
 def pegar_nome_arquivo(diretorio):
-    indice = diretorio.rfind('/') if sys.platform == "linux" else diretorio.rfind('\\')
+    indice = diretorio.rfind('/')
     return diretorio[indice + 1:]
 
 def setar_encoding(encoding):
