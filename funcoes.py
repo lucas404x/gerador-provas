@@ -4,14 +4,11 @@ from io import BytesIO
 from PIL import Image
 from tkinter import filedialog
 from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
 
 import _locale
 import requests
 import re
-
-def pegar_nome_arquivo(diretorio):
-    indice = diretorio.rfind('/')
-    return diretorio[indice + 1:]
 
 def setar_encoding(encoding):
     _locale._getdefaultlocale = (lambda *args: ['en_US', encoding])
@@ -91,25 +88,30 @@ def verificar_retornar_valor(questao_resposta):
         return "(resposta-descricao)"
     return
 
-def escrever_prova(materia, assunto, dados, tipo):
+def pega_diretorio(tipo = ""):
+
+    options = {'title': 'Salvar as {} em'.format(tipo) if tipo != "" else 'Salvar em', 
+    'defaultextension':'.pdf'}
+
+    with filedialog.asksaveasfile('w', **options) as file:
+        diretorio = file.name
+    
+    return diretorio
+
+def escrever_prova(materia, assunto, dados, diretorio):
     """
     metodo que serve para escrever em um documento pdf as questoes ou respostas da atividade/prova.
     dados - vetor com as N questões ou respostas;
     tipo - string com a palavra "questões" ou "respostas", para diferenciar o texto.
     """
 
-    options = {'title': 'Salvar as {} em'.format(tipo), 
-    'defaultextension':'.pdf'}
-
     setar_encoding('utf-8')
-    
-    with filedialog.asksaveasfile('w', **options) as file:
-        print(file.name)
-        print(pegar_nome_arquivo(file.name))
+    pdf = canvas.Canvas(diretorio, pagesize = letter)
+    pdf.setFont("Arial", 12)
+    pdf.drawString((letter[0]/2) - 100, letter[1] - 35, "Prova de {} - {}".format(materia, assunto))
+    y = (letter[0]/2) - 200
 
-        file.write('Prova de {} - {}\n'.format(materia.capitalize(), assunto.capitalize()))
-        file.write('\n')
-            
-        for i in range(len(dados)):
-            file.write('{} - {}\n'.format(str(i + 1), dados[i]))
-            file.write('\n')
+    for i in range(len(dados)):
+        pdf.drawString(20, y, dados[i])
+    
+    pdf.save()

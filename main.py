@@ -23,6 +23,6 @@ def main():
     respostas = extrair_dados(sites, 1)
     print("----------------------")
     print("Escrevendo a prova...")
-    escrever_prova(materia, assunto, questoes, "questoes")
-    escrever_prova(materia, assunto, respostas, "respostas")
+    escrever_prova(materia, assunto, questoes, pega_diretorio("questões"))
+    escrever_prova(materia, assunto, respostas, pega_diretorio("respostas"))
     acompanha_texto("Terminado!")
