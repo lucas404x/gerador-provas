@@ -107,11 +107,12 @@ def escrever_prova(materia, assunto, dados, diretorio):
 
     setar_encoding('utf-8')
     pdf = canvas.Canvas(diretorio, pagesize = letter)
-    pdf.setFont("Arial", 12)
+    #pdf.setFont("Arial", 12)
     pdf.drawString((letter[0]/2) - 100, letter[1] - 35, "Prova de {} - {}".format(materia, assunto))
-    y = (letter[0]/2) - 200
+    y = letter[1] - 50
 
     for i in range(len(dados)):
-        pdf.drawString(20, y, dados[i])
+        pdf.drawString(20, y, "{} - {}".format(i + 1, dados[i]))
+        y -= 20
     
     pdf.save()
