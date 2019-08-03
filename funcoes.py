@@ -4,7 +4,7 @@ from io import BytesIO
 from PIL import Image
 from tkinter import filedialog
 from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import letter
+from reportlab.lib.pagesizes import A4, portrait
 
 import _locale
 import requests
@@ -45,8 +45,8 @@ def extrair_dados(sites, questao_resposta):
     
     tipo_dado = verificar_retornar_valor(questao_resposta)
     dados = []
-    
     id_img = 0
+
     for site in sites:
         site_ = BeautifulSoup(site.text, features='html.parser')
         pattern = re.compile(tipo_dado)
@@ -68,16 +68,15 @@ def extrair_dados(sites, questao_resposta):
                 
                 #extração do texto dos dados
                 for paragrafo in paragrafos:
-                    dado += (paragrafo.text + '\n')
-                
-                dados.append(dado)
+                    dados.append(paragrafo.text)
+                    dados.append("\n")
                 
     return dados
 
 def verificar_retornar_valor(questao_resposta):
     """
-    metodo responsavel por verificar se foi posto um valor valido na
-    atributo questao_resposta e retorna o valor valido como uma string
+    função responsavel por verificar se foi posto um valor valido no
+    parametro questao_resposta e retorna o valor valido como uma string
     que vai ser usada no metodo extrair_dados.
     para ser valido, o número tem que ser 0 ou 1.
     """
@@ -105,14 +104,23 @@ def escrever_prova(materia, assunto, dados, diretorio):
     tipo - string com a palavra "questões" ou "respostas", para diferenciar o texto.
     """
 
+    TAMANHO_PAGINA = portrait(A4)
+
     setar_encoding('utf-8')
-    pdf = canvas.Canvas(diretorio, pagesize = letter)
-    #pdf.setFont("Arial", 12)
-    pdf.drawString((letter[0]/2) - 100, letter[1] - 35, "Prova de {} - {}".format(materia, assunto))
-    y = letter[1] - 50
+    pdf = canvas.Canvas(diretorio, pagesize = TAMANHO_PAGINA)
+    pdf.setFont("Helvetica", 9)
+    pdf.drawString((TAMANHO_PAGINA[0]/2) - 100, TAMANHO_PAGINA[1] - 35, "Prova de {} - {}".format(materia, assunto))
+    y = TAMANHO_PAGINA[1] - 100 
+    #id_questao = 1
 
     for i in range(len(dados)):
-        pdf.drawString(20, y, "{} - {}".format(i + 1, dados[i]))
-        y -= 20
+        if y <= (TAMANHO_PAGINA[1] + 10) - TAMANHO_PAGINA[1]:
+            pdf.showPage()
+            y = TAMANHO_PAGINA[1] - 35
+            pdf.setFont("Helvetica", 9)
+        
+        if not dados[i] == "\n":
+            pdf.drawString(10, y, "{}".format(dados[i]))
+            y -= 30
     
     pdf.save()
