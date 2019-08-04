@@ -117,8 +117,6 @@ def diminuir_texto(texto: str, limite: int):
 def escrever_prova(materia, assunto, dados, diretorio):
     """
     metodo que serve para escrever em um documento pdf as questoes ou respostas da atividade/prova.
-    dados - vetor com as N questões ou respostas;
-    tipo - string com a palavra "questões" ou "respostas", para diferenciar o texto.
     """
 
     TAMANHO_PAGINA = portrait(A4)

@@ -21,7 +21,6 @@ def main():
     print("Extraindo dados...")
     questoes = extrair_dados(sites, 0)
     respostas = extrair_dados(sites, 1)
-    print(questoes)
     print("----------------------")
     print("Escrevendo a prova...")
     escrever_prova(materia, assunto, questoes, pega_diretorio("questões"))
