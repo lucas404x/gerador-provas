@@ -5,6 +5,7 @@ from PIL import Image
 from tkinter import filedialog
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4, portrait
+from math import ceil
 
 import _locale
 import requests
@@ -69,7 +70,6 @@ def extrair_dados(sites, questao_resposta):
                 #extração do texto dos dados
                 for paragrafo in paragrafos:
                     dados.append(paragrafo.text)
-                    dados.append("\n")
                 
     return dados
 
@@ -97,6 +97,23 @@ def pega_diretorio(tipo = ""):
     
     return diretorio
 
+def trocar_caracter(string: str):
+
+    string = list(string)
+    old_caracter = string[-1]
+    string[-1] = '-' 
+    return old_caracter, "".join(string)
+
+def diminuir_texto(texto: str, limite: int):
+
+    texto_divido = []
+    old_texto = texto
+    texto = trocar_caracter(texto[:limite])
+    texto_divido.append(texto[1])
+    texto_divido.append(texto[0] + old_texto[limite:])
+    return texto_divido
+
+
 def escrever_prova(materia, assunto, dados, diretorio):
     """
     metodo que serve para escrever em um documento pdf as questoes ou respostas da atividade/prova.
@@ -120,7 +137,12 @@ def escrever_prova(materia, assunto, dados, diretorio):
             pdf.setFont("Helvetica", 9)
         
         if not dados[i] == "\n":
-            pdf.drawString(10, y, "{}".format(dados[i]))
-            y -= 30
+            if len(dados[i]) > 135:
+                for texto in diminuir_texto(dados[i], 135):
+                    pdf.drawString(10, y, "{}".format(texto))
+                    y -= 30
+            else:
+                pdf.drawString(10, y, "{}".format(dados[i]))
+                y -= 30
     
     pdf.save()
