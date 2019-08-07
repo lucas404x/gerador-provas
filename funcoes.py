@@ -101,19 +101,23 @@ def trocar_caracter(string: str):
 
     string = list(string)
     old_caracter = string[-1]
-    string[-1] = '-' 
+    string[-1] = '-' if old_caracter.isalpha() else old_caracter
     return old_caracter, "".join(string)
 
-def diminuir_texto(texto: str, limite: int):
+def quebrar_linha(texto: str, limite: int):
 
     texto_divido = []
-    old_texto = texto
-    texto = trocar_caracter(texto[:limite])
-    texto_divido.append(texto[1])
-    texto_divido.append(texto[0] + old_texto[limite:])
+    loop = ceil((len(texto)/limite) - 1)
+    for i in range(loop):
+        old_texto = texto
+        texto = trocar_caracter(texto[:limite]) # faz uma substring do inicio ao limite
+        texto_divido.append(texto[1]) # adiciona o novo texto a lista
+        if loop == 1:
+            texto_divido.append(texto[0] + old_texto[limite:])
+        texto = texto[0] + old_texto[limite:]
+
     return texto_divido
-
-
+    
 def escrever_prova(materia, assunto, dados, diretorio):
     """
     metodo que serve para escrever em um documento pdf as questoes ou respostas da atividade/prova.
@@ -136,9 +140,14 @@ def escrever_prova(materia, assunto, dados, diretorio):
         
         if not dados[i] == "\n":
             if len(dados[i]) > 135:
-                for texto in diminuir_texto(dados[i], 135):
+                for texto in quebrar_linha(dados[i], 135):
                     pdf.drawString(10, y, "{}".format(texto))
                     y -= 30
+                    if y <= (TAMANHO_PAGINA[1] + 10) - TAMANHO_PAGINA[1]:
+                        pdf.showPage()
+                        y = TAMANHO_PAGINA[1] - 35
+                        pdf.setFont("Helvetica", 9)
+
             else:
                 pdf.drawString(10, y, "{}".format(dados[i]))
                 y -= 30
