@@ -10,6 +10,7 @@ from math import ceil
 import _locale
 import requests
 import re
+import os
 
 def setar_encoding(encoding):
     _locale._getdefaultlocale = (lambda *args: ['en_US', encoding])
@@ -38,12 +39,16 @@ def acessar_links(urls):
 	"""
 	return [requests.get(site) for site in urls]
 
-def extrair_dados(sites, questao_resposta):
+def extrair_dados(sites, questao_resposta, diretorio):
     """
     função responsavel por extrair as questões/respostas do site Brasil Escola.
+    sites: lista com as urls
     questao_resposta: 0 para extrair as questões e 1 para as respostas.
+    diretorio: diretorio onde será salvo os dados
     """
     
+    criar_pastas_prova(diretorio)
+
     tipo_dado = verificar_retornar_valor(questao_resposta)
     dados = []
     id_img = 0
@@ -64,7 +69,8 @@ def extrair_dados(sites, questao_resposta):
                 for imagem in imagens:
                     img = requests.get(imagem['src'])
                     img = Image.open(BytesIO(img.content))
-                    img.save('{}.png'.format(tipo_dado + str(id_img)))
+                    save = os.path.join(diretorio, 'imagens', tipo_dado + str(id_img))
+                    img.save('{}.png'.format(save))
                     id_img += 1
                 
                 #extração do texto dos dados
@@ -87,15 +93,16 @@ def verificar_retornar_valor(questao_resposta):
         return "(resposta-descricao)"
     return
 
-def pega_diretorio(tipo = ""):
-
-    options = {'title': 'Salvar as {} em'.format(tipo) if tipo != "" else 'Salvar em', 
-    'defaultextension':'.pdf'}
-
-    with filedialog.asksaveasfile('w', **options) as file:
-        diretorio = file.name
+def criar_pastas_prova(diretorio):
     
-    return diretorio
+    try:
+        os.mkdir(diretorio)
+        os.mkdir(os.path.join(diretorio, 'imagens'))
+    except Exception as e:
+        print("Ocorreu um erro.",e)
+
+def pega_diretorio():
+    return os.path.join(filedialog.askdirectory(), "prova-questoes-respostas")
 
 def trocar_caracter(string: str):
 
@@ -105,9 +112,9 @@ def trocar_caracter(string: str):
     return old_caracter, "".join(string)
 
 def quebrar_linha(texto: str, limite: int):
-
     texto_divido = []
-    loop = ceil((len(texto)/limite) - 1)
+    loop = ceil(len(texto)/limite)
+
     for i in range(loop):
         old_texto = texto
         texto = trocar_caracter(texto[:limite]) # faz uma substring do inicio ao limite
@@ -118,7 +125,7 @@ def quebrar_linha(texto: str, limite: int):
 
     return texto_divido
     
-def escrever_prova(materia, assunto, dados, diretorio):
+def escrever_prova(materia, assunto, dados, diretorio, nome_arquivo):
     """
     metodo que serve para escrever em um documento pdf as questoes ou respostas da atividade/prova.
     """
@@ -126,7 +133,8 @@ def escrever_prova(materia, assunto, dados, diretorio):
     TAMANHO_PAGINA = portrait(A4)
 
     setar_encoding('utf-8')
-    pdf = canvas.Canvas(diretorio, pagesize = TAMANHO_PAGINA)
+    nome_arquivo = nome_arquivo + '.pdf' if not 'pdf' in nome_arquivo else nome_arquivo
+    pdf = canvas.Canvas(os.path.join(diretorio, nome_arquivo), pagesize = TAMANHO_PAGINA)
     pdf.setFont("Helvetica", 9)
     pdf.drawString((TAMANHO_PAGINA[0]/2) - 100, TAMANHO_PAGINA[1] - 35, "Prova de {} - {}".format(materia, assunto))
     y = TAMANHO_PAGINA[1] - 100 

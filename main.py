@@ -19,10 +19,13 @@ def main():
     sites = acessar_links(links)
     print("----------------------")
     print("Extraindo dados...")
-    questoes = extrair_dados(sites, 0)
-    respostas = extrair_dados(sites, 1)
+    diretorio = pega_diretorio()
+    questoes = extrair_dados(sites, 0, diretorio)
+    respostas = extrair_dados(sites, 1, diretorio)
     print("----------------------")
     print("Escrevendo a prova...")
-    escrever_prova(materia, assunto, questoes, pega_diretorio("questões"))
-    escrever_prova(materia, assunto, respostas, pega_diretorio("respostas"))
+    escrever_prova(materia, assunto, questoes, diretorio, 
+    "questoes_{}_{}".format(materia, assunto))
+    escrever_prova(materia, assunto, respostas, diretorio, 
+    "respostas_{}_{}".format(materia, assunto))
     acompanha_texto("Terminado!")
