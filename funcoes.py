@@ -46,37 +46,60 @@ def extrair_dados(sites, questao_resposta, diretorio):
     questao_resposta: 0 para extrair as questões e 1 para as respostas.
     diretorio: diretorio onde será salvo os dados
     """
-    
+
     criar_pastas_prova(diretorio)
 
+    indice_id_questao = 0
     tipo_dado = verificar_retornar_valor(questao_resposta)
-    dados = []
-    id_img = 0
+    dados = {
+                'identificador_questoes':[],
+                    'dados':[]        
+            }
 
     for site in sites:
         site_ = BeautifulSoup(site.text, features='html.parser')
-        pattern = re.compile(tipo_dado)
+        pattern = re.compile(tipo_dado[0])
         comparate = re.findall(pattern, str(site.text))
         
         if comparate:
-            site_ = site_.find_all(attrs = {'class':comparate[0]})
-            for tag in site_:
+            id_img, num_questao = 0, 0
+            site = site_.find_all(attrs = {'class':comparate[0]})
+            id_questoes = site_.find_all(attrs = {'class':tipo_dado[1]})
+            for tag in site:
                 dado = ''
                 imagens = tag.find_all('img')
                 paragrafos = tag.find_all('p')
                 
                 #extração das imagens
-                for imagem in imagens:
-                    img = requests.get(imagem['src'])
-                    img = Image.open(BytesIO(img.content))
-                    save = os.path.join(diretorio, 'imagens', tipo_dado + str(id_img))
-                    img.save('{}.png'.format(save))
-                    id_img += 1
+                # for imagem in imagens:
+                #     img = requests.get(imagem['src'])
+                #     img = Image.open(BytesIO(img.content))
+                #     save = os.path.join(diretorio, 'imagens', tipo_dado + str(id_img))
+                #     img.save('{}.png'.format(save))
+                #     id_img += 1
                 
                 #extração do texto dos dados
-                for paragrafo in paragrafos:
-                    dados.append(paragrafo.text)
+                pos_questao = None
+                for paragrafo in range(len(paragrafos)):
+                    dados['dados'].append(paragrafos[paragrafo].text)
+                    if paragrafo == 0:
+                        pos_questao = len(dados['dados']) - 1
                 
+                dados['identificador_questoes'].append(id_questoes[num_questao].text)
+                dados['identificador_questoes'] = atualizar_id_dado(dados['identificador_questoes'])
+                
+                dados['dados'][pos_questao] = dados['identificador_questoes'][indice_id_questao].capitalize() 
+                + ' - ' 
+                + dados['dados'][pos_questao]
+                
+                num_questao += 1
+                indice_id_questao += 1
+                
+    return dados
+
+def atualizar_id_dado(dados: list):
+    id_atual = dados[-1][-1]
+    dados[-1] = dados[-1].replace(id_atual, str(len(dados)))
     return dados
 
 def verificar_retornar_valor(questao_resposta):
@@ -88,9 +111,9 @@ def verificar_retornar_valor(questao_resposta):
     """
     
     if questao_resposta == 0:
-        return "(questoes-descricao)"
+        return "(questoes-descricao)", "questoes-header"
     elif questao_resposta == 1:
-        return "(resposta-descricao)"
+        return "(resposta-descricao)", "resposta-header"
     return
 
 def criar_pastas_prova(diretorio):

@@ -24,8 +24,11 @@ def main():
     respostas = extrair_dados(sites, 1, diretorio)
     print("----------------------")
     print("Escrevendo a prova...")
-    escrever_prova(materia, assunto, questoes, diretorio, 
+    
+    escrever_prova(materia, assunto, questoes['dados'], diretorio, 
     "questoes_{}_{}".format(materia, assunto))
-    escrever_prova(materia, assunto, respostas, diretorio, 
+
+    escrever_prova(materia, assunto, respostas['dados'], diretorio, 
     "respostas_{}_{}".format(materia, assunto))
+    
     acompanha_texto("Terminado!")
