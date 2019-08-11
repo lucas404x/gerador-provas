@@ -88,9 +88,7 @@ def extrair_dados(sites, questao_resposta, diretorio):
                 dados['identificador_questoes'].append(id_questoes[num_questao].text)
                 dados['identificador_questoes'] = atualizar_id_dado(dados['identificador_questoes'])
                 
-                dados['dados'][pos_questao] = dados['identificador_questoes'][indice_id_questao].capitalize() 
-                + ' - ' 
-                + dados['dados'][pos_questao]
+                dados['dados'][pos_questao] = dados['identificador_questoes'][indice_id_questao].capitalize() + ' - ' + dados['dados'][pos_questao]
                 
                 num_questao += 1
                 indice_id_questao += 1
