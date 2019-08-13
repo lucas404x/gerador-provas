@@ -47,12 +47,12 @@ def extrair_dados(sites, questao_resposta, diretorio):
     diretorio: diretorio onde será salvo os dados
     """
 
-    criar_pastas_prova(diretorio)
-
-    indice_id_questao = 0
+    indice_id_dado = 0
+    diretorio_img = os.path.join(diretorio, 'imagens')
+    id_img = len(os.listdir(diretorio_img))
     tipo_dado = verificar_retornar_valor(questao_resposta)
     dados = {
-                'identificador_questoes':[],
+                'identificador_dados':[],
                     'dados':[]        
             }
 
@@ -62,42 +62,44 @@ def extrair_dados(sites, questao_resposta, diretorio):
         comparate = re.findall(pattern, str(site.text))
         
         if comparate:
-            id_img, num_questao = 0, 0
+            num_dado = 0
             site = site_.find_all(attrs = {'class':comparate[0]})
-            id_questoes = site_.find_all(attrs = {'class':tipo_dado[1]})
+            id_dados = site_.find_all(attrs = {'class':tipo_dado[1]})
             for tag in site:
                 dado = ''
                 imagens = tag.find_all('img')
                 paragrafos = tag.find_all('p')
                 
-                #extração das imagens
-                # for imagem in imagens:
-                #     img = requests.get(imagem['src'])
-                #     img = Image.open(BytesIO(img.content))
-                #     save = os.path.join(diretorio, 'imagens', tipo_dado + str(id_img))
-                #     img.save('{}.png'.format(save))
-                #     id_img += 1
+                # extração das imagens
+
+                for imagem in imagens:
+                    img = requests.get(imagem['src'])
+                    img = Image.open(BytesIO(img.content))
+                    save = os.path.join(diretorio_img, str(id_img))
+                    img.save('{}.png'.format(save))
+                    id_img += 1
                 
                 #extração do texto dos dados
-                pos_questao = None
+                
+                pos_dado = None
                 for paragrafo in range(len(paragrafos)):
                     dados['dados'].append(paragrafos[paragrafo].text)
                     if paragrafo == 0:
-                        pos_questao = len(dados['dados']) - 1
+                        pos_dado = len(dados['dados']) - 1
                 
-                dados['identificador_questoes'].append(id_questoes[num_questao].text)
-                dados['identificador_questoes'] = atualizar_id_dado(dados['identificador_questoes'])
+                dados['identificador_dados'].append(id_dados[num_dado].text)
+                dados['identificador_dados'] = atualizar_id_dado(dados['identificador_dados'])
                 
-                dados['dados'][pos_questao] = dados['identificador_questoes'][indice_id_questao].capitalize() + ' - ' + dados['dados'][pos_questao]
+                dados['dados'][pos_dado] = dados['identificador_dados'][indice_id_dado].capitalize() + ' - ' + dados['dados'][pos_dado]
                 
-                num_questao += 1
-                indice_id_questao += 1
+                num_dado += 1
+                indice_id_dado += 1
                 
     return dados
 
 def atualizar_id_dado(dados: list):
-    id_atual = dados[-1][-1]
-    dados[-1] = dados[-1].replace(id_atual, str(len(dados)))
+    ultimo_id = dados[-1][-1]
+    dados[-1] = dados[-1].replace(ultimo_id, str(len(dados)))
     return dados
 
 def verificar_retornar_valor(questao_resposta):
@@ -114,16 +116,28 @@ def verificar_retornar_valor(questao_resposta):
         return "(resposta-descricao)", "resposta-header"
     return
 
-def criar_pastas_prova(diretorio):
+def criar_pastas_prova(diretorio, nome_pasta):
     
     try:
-        os.mkdir(diretorio)
-        os.mkdir(os.path.join(diretorio, 'imagens'))
+        os.mkdir(os.path.join(diretorio, nome_pasta))
+        os.mkdir(os.path.join(diretorio, nome_pasta, 'imagens'))
     except Exception as e:
         print("Ocorreu um erro.",e)
 
 def pega_diretorio():
-    return os.path.join(filedialog.askdirectory(), "prova-questoes-respostas")
+    return filedialog.askdirectory()
+
+def extrair_imagens(diretorio):
+    return os.listdir(diretorio)
+
+def dividir(path_or_file, caracter):
+    indice = path_or_file.rfind(caracter)
+    return path_or_file[:indice]
+
+def ordernar_imagens(imagens):
+    imagens = [int(dividir(imagem, '.')) for imagem in imagens]
+    imagens.sort()
+    return [str(imagem) + '.png' for imagem in imagens]
 
 def trocar_caracter(string: str):
 
@@ -145,40 +159,51 @@ def quebrar_linha(texto: str, limite: int):
         texto = texto[0] + old_texto[limite:]
 
     return texto_divido
-    
-def escrever_prova(materia, assunto, dados, diretorio, nome_arquivo):
+
+def setar_config():
+    pass
+
+def escrever_prova(materia, assunto, dados, diretorio):
     """
     metodo que serve para escrever em um documento pdf as questoes ou respostas da atividade/prova.
     """
 
     TAMANHO_PAGINA = portrait(A4)
-
+    #print(dados)
     setar_encoding('utf-8')
-    nome_arquivo = nome_arquivo + '.pdf' if not 'pdf' in nome_arquivo else nome_arquivo
-    pdf = canvas.Canvas(os.path.join(diretorio, nome_arquivo), pagesize = TAMANHO_PAGINA)
-    pdf.setFont("Helvetica", 9)
+    diretorio = diretorio + '.pdf' if not diretorio.rfind('.pdf') else diretorio
+    diretorio_imgs = os.path.join(dividir(diretorio, '/'), 'imagens')
+    imagens = ordernar_imagens(extrair_imagens(diretorio_imgs))
+    pdf = canvas.Canvas(diretorio, pagesize = TAMANHO_PAGINA)
+    pdf.setFont("Helvetica", 12)
     pdf.drawString((TAMANHO_PAGINA[0]/2) - 100, TAMANHO_PAGINA[1] - 35, "Prova de {} - {}".format(materia, assunto))
-    y = TAMANHO_PAGINA[1] - 100 
-    #id_questao = 1
+    pdf.setFont("Helvetica", 9)
+    y = TAMANHO_PAGINA[1] - 100
+    id_img = 0
 
     for i in range(len(dados)):
         if y <= (TAMANHO_PAGINA[1] + 10) - TAMANHO_PAGINA[1]:
             pdf.showPage()
             y = TAMANHO_PAGINA[1] - 35
             pdf.setFont("Helvetica", 9)
-        
-        if not dados[i] == "\n":
-            if len(dados[i]) > 135:
-                for texto in quebrar_linha(dados[i], 135):
-                    pdf.drawString(10, y, "{}".format(texto))
-                    y -= 30
-                    if y <= (TAMANHO_PAGINA[1] + 10) - TAMANHO_PAGINA[1]:
-                        pdf.showPage()
-                        y = TAMANHO_PAGINA[1] - 35
-                        pdf.setFont("Helvetica", 9)
 
-            else:
-                pdf.drawString(10, y, "{}".format(dados[i]))
-                y -= 30
+        if len(dados[i]) > 135:
+            for texto in quebrar_linha(dados[i], 135):
+                if y <= (TAMANHO_PAGINA[1] + 10) - TAMANHO_PAGINA[1]:
+                    pdf.showPage()
+                    y = TAMANHO_PAGINA[1] - 35
+                    pdf.setFont("Helvetica", 9)
+                pdf.drawString(10, y, "{}".format(texto)) 
+                y -= 25
+            
+        elif not dados[i] == '':
+            pdf.drawString(10, y, "{}".format(dados[i]))
+            y -= 25
+                
+        else:
+            y -= 45
+            pdf.drawImage(os.path.join(diretorio_imgs, imagens[id_img]), 10, y, width = 100, height = 100)
+            id_img += 1
+            y -= 25
     
     pdf.save()
