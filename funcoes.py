@@ -53,7 +53,8 @@ def extrair_dados(sites, questao_resposta, diretorio):
     tipo_dado = verificar_retornar_valor(questao_resposta)
     dados = {
                 'identificador_dados':[],
-                    'dados':[]        
+                'tamanho_imagens':[],
+                    'dados':[]    
             }
 
     for site in sites:
@@ -75,6 +76,15 @@ def extrair_dados(sites, questao_resposta, diretorio):
                 for imagem in imagens:
                     img = requests.get(imagem['src'])
                     img = Image.open(BytesIO(img.content))
+
+                    try:
+                        tamanho_imagem = imagem['style']
+                    except KeyError:
+                        tamanho_imagem = (imagem['width'], imagem['height'])
+                    else:
+                        tamanho_imagem = extrair_dimensoes(tamanho_imagem, ';')
+                    
+                    dados['tamanho_imagens'].append((tamanho_imagem[0], tamanho_imagem[1]))
                     save = os.path.join(diretorio_img, str(id_img))
                     img.save('{}.png'.format(save))
                     id_img += 1
@@ -96,6 +106,23 @@ def extrair_dados(sites, questao_resposta, diretorio):
                 indice_id_dado += 1
                 
     return dados
+
+def extrair_dimensoes(dimensoes: str, sep: str):
+    
+    dimensoes = dimensoes.split(sep)
+    dimensoes_extraidas = []
+
+    for dimensao in dimensoes:
+        inicio = dimensao.find(':')
+        fim = dimensao.rfind('p')
+        try:
+            dimensao = int(dimensao[inicio + 1:fim].strip())
+        except ValueError:
+            pass
+        else:
+            dimensoes_extraidas.append(dimensao)
+
+    return dimensoes_extraidas
 
 def atualizar_id_dado(dados: list):
     ultimo_id = dados[-1][-1]
@@ -169,7 +196,6 @@ def escrever_prova(materia, assunto, dados, diretorio):
     """
 
     TAMANHO_PAGINA = portrait(A4)
-    #print(dados)
     setar_encoding('utf-8')
     diretorio = diretorio + '.pdf' if not diretorio.rfind('.pdf') else diretorio
     diretorio_imgs = os.path.join(dividir(diretorio, '/'), 'imagens')
@@ -181,14 +207,14 @@ def escrever_prova(materia, assunto, dados, diretorio):
     y = TAMANHO_PAGINA[1] - 100
     id_img = 0
 
-    for i in range(len(dados)):
+    for i in range(len(dados['dados'])):
         if y <= (TAMANHO_PAGINA[1] + 10) - TAMANHO_PAGINA[1]:
             pdf.showPage()
             y = TAMANHO_PAGINA[1] - 35
             pdf.setFont("Helvetica", 9)
 
-        if len(dados[i]) > 135:
-            for texto in quebrar_linha(dados[i], 135):
+        if len(dados['dados'][i]) > 135:
+            for texto in quebrar_linha(dados['dados'][i], 135):
                 if y <= (TAMANHO_PAGINA[1] + 10) - TAMANHO_PAGINA[1]:
                     pdf.showPage()
                     y = TAMANHO_PAGINA[1] - 35
@@ -196,13 +222,14 @@ def escrever_prova(materia, assunto, dados, diretorio):
                 pdf.drawString(10, y, "{}".format(texto)) 
                 y -= 25
             
-        elif not dados[i] == '':
-            pdf.drawString(10, y, "{}".format(dados[i]))
+        elif not dados['dados'][i] == '':
+            pdf.drawString(10, y, "{}".format(dados['dados'][i]))
             y -= 25
                 
         else:
-            y -= 45
-            pdf.drawImage(os.path.join(diretorio_imgs, imagens[id_img]), 10, y, width = 100, height = 100)
+            y -= 100
+            pdf.drawImage(os.path.join(diretorio_imgs, imagens[id_img]), 10, y, 
+            width = dados['tamanho_imagens'][i][0], height = dados['tamanho_imagens'][i][1])
             id_img += 1
             y -= 25
     

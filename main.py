@@ -9,8 +9,8 @@ def acompanha_texto(string):
 def main():
 
     acompanha_texto("Gerador de Provas")
-    materia = input("Matéria: ")
-    assunto = input("Assunto: ")
+    materia = input("Matéria: ").lower()
+    assunto = input("Assunto: ").lower()
     print("----------------------")
     print("Buscando links...")
     links = buscar_links(materia, assunto)
@@ -27,10 +27,10 @@ def main():
     print("----------------------")
     print("Escrevendo a prova...")
     
-    escrever_prova(materia, assunto, questoes['dados'], 
+    escrever_prova(materia, assunto, questoes, 
     os.path.join(diretorio, nome_pasta, 'questões-{}-{}.pdf'.format(materia, assunto)))
 
-    escrever_prova(materia, assunto, respostas['dados'], 
+    escrever_prova(materia, assunto, respostas, 
     os.path.join(diretorio, nome_pasta, 'respostas-{}-{}.pdf'.format(materia, assunto)))
     
     acompanha_texto("Terminado!")
