@@ -27,10 +27,7 @@ def main():
     print("----------------------")
     print("Escrevendo a prova...")
     
-    escrever_prova(materia, assunto, questoes, 
-    os.path.join(diretorio, nome_pasta, 'questões-{}-{}.pdf'.format(materia, assunto)))
-
-    escrever_prova(materia, assunto, respostas, 
-    os.path.join(diretorio, nome_pasta, 'respostas-{}-{}.pdf'.format(materia, assunto)))
+    escrever_prova(materia, assunto, questoes, os.path.join(diretorio, nome_pasta, 'questões-{}-{}.pdf'.format(materia, assunto)))
+    escrever_prova(materia, assunto, respostas, os.path.join(diretorio, nome_pasta, 'respostas-{}-{}.pdf'.format(materia, assunto)))
     
     acompanha_texto("Terminado!")

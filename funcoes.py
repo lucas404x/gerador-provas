@@ -76,11 +76,10 @@ def extrair_dados(sites, questao_resposta, diretorio):
                 for imagem in imagens:
                     img = requests.get(imagem['src'])
                     img = Image.open(BytesIO(img.content))
-
                     try:
                         tamanho_imagem = imagem['style']
                     except KeyError:
-                        tamanho_imagem = (imagem['width'], imagem['height'])
+                        tamanho_imagem = (int(imagem['width']), int(imagem['height']))
                     else:
                         tamanho_imagem = extrair_dimensoes(tamanho_imagem, ';')
                     
@@ -104,7 +103,7 @@ def extrair_dados(sites, questao_resposta, diretorio):
                 
                 num_dado += 1
                 indice_id_dado += 1
-                
+
     return dados
 
 def extrair_dimensoes(dimensoes: str, sep: str):
@@ -229,7 +228,7 @@ def escrever_prova(materia, assunto, dados, diretorio):
         else:
             y -= 100
             pdf.drawImage(os.path.join(diretorio_imgs, imagens[id_img]), 10, y, 
-            width = dados['tamanho_imagens'][i][0], height = dados['tamanho_imagens'][i][1])
+            width = dados['tamanho_imagens'][id_img][0], height = dados['tamanho_imagens'][id_img][1])
             id_img += 1
             y -= 25
     
