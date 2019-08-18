@@ -1,6 +1,6 @@
 from funcoes import *
 
-def acompanha_texto(string):
+def acompanha_texto(string: str):
     
     print("=" * len(string))
     print(string)

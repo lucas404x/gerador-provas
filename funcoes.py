@@ -52,9 +52,10 @@ def extrair_dados(sites, questao_resposta, diretorio):
     id_img = len(os.listdir(diretorio_img))
     tipo_dado = verificar_retornar_valor(questao_resposta)
     dados = {
+                'dados':[],
                 'identificador_dados':[],
                 'tamanho_imagens':[],
-                    'dados':[]    
+                'inicio_dado':str(id_img) + '.png'
             }
 
     for site in sites:
@@ -81,13 +82,13 @@ def extrair_dados(sites, questao_resposta, diretorio):
                     except KeyError:
                         tamanho_imagem = (int(imagem['width']), int(imagem['height']))
                     else:
-                        tamanho_imagem = extrair_dimensoes(tamanho_imagem, ';')
+                        tamanho_imagem = extrair_dimensoes(tamanho_imagem)
                     
                     dados['tamanho_imagens'].append((tamanho_imagem[0], tamanho_imagem[1]))
                     save = os.path.join(diretorio_img, str(id_img))
                     img.save('{}.png'.format(save))
                     id_img += 1
-                
+
                 #extração do texto dos dados
                 
                 pos_dado = None
@@ -103,25 +104,15 @@ def extrair_dados(sites, questao_resposta, diretorio):
                 
                 num_dado += 1
                 indice_id_dado += 1
-
+                
     return dados
 
-def extrair_dimensoes(dimensoes: str, sep: str):
-    
-    dimensoes = dimensoes.split(sep)
-    dimensoes_extraidas = []
+def extrair_dimensoes(dimensoes: str):
+    padrao = r'\d+'
+    return converter_tipo_elementos(re.findall(padrao, dimensoes), int)
 
-    for dimensao in dimensoes:
-        inicio = dimensao.find(':')
-        fim = dimensao.rfind('p')
-        try:
-            dimensao = int(dimensao[inicio + 1:fim].strip())
-        except ValueError:
-            pass
-        else:
-            dimensoes_extraidas.append(dimensao)
-
-    return dimensoes_extraidas
+def converter_tipo_elementos(lista: str, tipo_primitivo):
+    return [tipo_primitivo(elemento) for elemento in lista]
 
 def atualizar_id_dado(dados: list):
     ultimo_id = dados[-1][-1]
@@ -137,13 +128,12 @@ def verificar_retornar_valor(questao_resposta):
     """
     
     if questao_resposta == 0:
-        return "(questoes-descricao)", "questoes-header"
+        return "(questoes-descricao)", "questoes-header", "questao"
     elif questao_resposta == 1:
-        return "(resposta-descricao)", "resposta-header"
+        return "(resposta-descricao)", "resposta-header", "resposta"
     return
 
 def criar_pastas_prova(diretorio, nome_pasta):
-    
     try:
         os.mkdir(os.path.join(diretorio, nome_pasta))
         os.mkdir(os.path.join(diretorio, nome_pasta, 'imagens'))
@@ -161,12 +151,11 @@ def dividir(path_or_file, caracter):
     return path_or_file[:indice]
 
 def ordernar_imagens(imagens):
-    imagens = [int(dividir(imagem, '.')) for imagem in imagens]
-    imagens.sort()
-    return [str(imagem) + '.png' for imagem in imagens]
+    imagens_ordenadas = [int(dividir(imagem, '.')) for imagem in imagens]
+    imagens_ordenadas.sort()
+    return [str(imagem) + '.png' for imagem in imagens_ordenadas]
 
 def trocar_caracter(string: str):
-
     string = list(string)
     old_caracter = string[-1]
     string[-1] = '-' if old_caracter.isalpha() else old_caracter
@@ -186,9 +175,6 @@ def quebrar_linha(texto: str, limite: int):
 
     return texto_divido
 
-def setar_config():
-    pass
-
 def escrever_prova(materia, assunto, dados, diretorio):
     """
     metodo que serve para escrever em um documento pdf as questoes ou respostas da atividade/prova.
@@ -199,6 +185,8 @@ def escrever_prova(materia, assunto, dados, diretorio):
     diretorio = diretorio + '.pdf' if not diretorio.rfind('.pdf') else diretorio
     diretorio_imgs = os.path.join(dividir(diretorio, '/'), 'imagens')
     imagens = ordernar_imagens(extrair_imagens(diretorio_imgs))
+    primeira_img = imagens.index(dados['inicio_dado'])
+    imagens = imagens[primeira_img:]
     pdf = canvas.Canvas(diretorio, pagesize = TAMANHO_PAGINA)
     pdf.setFont("Helvetica", 12)
     pdf.drawString((TAMANHO_PAGINA[0]/2) - 100, TAMANHO_PAGINA[1] - 35, "Prova de {} - {}".format(materia, assunto))
