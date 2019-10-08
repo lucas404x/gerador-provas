@@ -1,10 +1,12 @@
 from funcoes import *
 
+
 def acompanha_texto(string: str):
     
     print("=" * len(string))
     print(string)
     print("=" * len(string))
+
 
 def main():
 
@@ -31,3 +33,7 @@ def main():
     escrever_prova(materia, assunto, respostas, os.path.join(diretorio, nome_pasta, 'respostas-{}-{}.pdf'.format(materia, assunto)))
     
     acompanha_texto("Terminado!")
+
+
+if __name__ == "__main__":
+    main()
