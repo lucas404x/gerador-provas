@@ -48,7 +48,7 @@ def extrair_dados(sites, questao_resposta, diretorio):
     """
 
     indice_id_dado = 0
-    diretorio_img = os.path.join(diretorio, 'imagens')
+    diretorio_img = diretorio + '/imagens'
     id_img = len(os.listdir(diretorio_img))
     tipo_dado = verificar_retornar_valor(questao_resposta)
     dados = {
@@ -183,16 +183,20 @@ def escrever_prova(materia, assunto, dados, diretorio):
     TAMANHO_PAGINA = portrait(A4)
     setar_encoding('utf-8')
     diretorio = diretorio + '.pdf' if not diretorio.rfind('.pdf') else diretorio
-    diretorio_imgs = os.path.join(dividir(diretorio, '/'), 'imagens')
-    imagens = ordernar_imagens(extrair_imagens(diretorio_imgs))
-    primeira_img = imagens.index(dados['inicio_dado'])
-    imagens = imagens[primeira_img:]
+    diretorio_imgs = dividir(diretorio, "/" if os.sys.platform == "linux" else '\\') + '/imagens'
+    imagens = extrair_imagens(diretorio_imgs)
+    
+    if len(imagens) > 0:
+        imagens = ordernar_imagens(imagens)
+        primeira_img = imagens.index(dados['inicio_dado'])
+        imagens = imagens[primeira_img:]
+        id_img = 0
+
     pdf = canvas.Canvas(diretorio, pagesize = TAMANHO_PAGINA)
     pdf.setFont("Helvetica", 12)
     pdf.drawString((TAMANHO_PAGINA[0]/2) - 100, TAMANHO_PAGINA[1] - 35, "Prova de {} - {}".format(materia, assunto))
     pdf.setFont("Helvetica", 9)
     y = TAMANHO_PAGINA[1] - 100
-    id_img = 0
 
     for i in range(len(dados['dados'])):
         if y <= (TAMANHO_PAGINA[1] + 10) - TAMANHO_PAGINA[1]:
@@ -212,12 +216,12 @@ def escrever_prova(materia, assunto, dados, diretorio):
         elif not dados['dados'][i] == '':
             pdf.drawString(10, y, "{}".format(dados['dados'][i]))
             y -= 25
-                
+        """                
         else:
             y -= 100
             pdf.drawImage(os.path.join(diretorio_imgs, imagens[id_img]), 10, y, 
             width = dados['tamanho_imagens'][id_img][0], height = dados['tamanho_imagens'][id_img][1])
             id_img += 1
             y -= 25
-    
+        """ 
     pdf.save()
